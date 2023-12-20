@@ -1,0 +1,69 @@
+#!/bin/bash
+set-x
+
+action=$1
+
+case $action in
+  addlinetop)
+     temp_file=$2
+     line=$3
+
+     sed -i "1i\\${line}" "${temp_file}"
+
+
+    ;;
+  addlinebottom)
+     temp_file=$2
+     line=$3
+    sed -i "\$a\\${line}" "${temp_file}"
+
+
+    ;;
+  addlineat)
+    temp_file=$2
+     line_num=$3
+     line=$4
+     sed -i "${line_num}i\\${line}" "${temp_file}"
+    ;;
+
+  updatefirstword)
+     temp_file=$2
+     old_word=$3
+     new_word=$4
+
+     sed "s/$old_word/$new_word/" "${temp_file}"
+
+
+     ;;
+
+  updateallwords)
+
+   temp_file=$2
+     old_word=$3
+     new_word=$4
+
+     sed "s/${old_word}/${new_word}/g" "${temp_file}"
+
+    
+    ;;
+  insertword)
+    temp_file=$2
+    w1=$3
+    w2=$4
+    insert_word=$5
+    sed "s/${w1}\(.*\)$w2/${w1}\\ ${insert_word} ${w2}/" "${temp_file}"
+
+      ;;
+  
+  deleteline)
+   temp_file=$2
+     line_num=$3
+
+     sed -i "/${line_num}/d" "${temp_file}"
+
+
+    ;;
+  *)
+    # commands to be executed if expression doesn't match any of the above patterns
+    ;;
+esac

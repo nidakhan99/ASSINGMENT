@@ -1,0 +1,20 @@
+
+#!/bin/bash
+
+
+temp_file=$1
+
+content=$(cat "$temp_file")
+
+for arg in "$@"; do
+  key="${arg%=*}"
+  value="${arg#*=}"
+  content=$(echo "$content" | sed "s/{{$key}}/${value}/g")
+done
+
+echo
+
+
+echo "$content">trainer.template
+
+
