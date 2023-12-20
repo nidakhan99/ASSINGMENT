@@ -1,0 +1,78 @@
+#!/bin/bash
+#set -x 
+
+Process=$1
+
+case "$Process" in
+    Topprocess)
+        num=$2
+        procname=$3
+        if [[ "$procname" == "memory" ]];then
+         ps aux --sort=-%mem | sed -n 1,"$num"p
+
+        elif [[ "$procname" == "cpu" ]];then
+        ps aux --sort=-%cpu | sed -n 1,"$num"p
+
+        fi
+
+        ;;
+
+
+    KillLeastPriorityProcess)
+      #take out the lowest priority process.
+        # ps -e -o pid,user,ni,comm --sort=ni | grep -w "nida"
+
+         Pid=$(top -b -n 1| ps -e -o pid  --sort=ni |tail -n 1)
+         echo "killing process id : $Pid " 
+         kill -9 $Pid 
+         
+       # Check the exit status
+         if [ $? -eq 0 ]; then
+           echo "process has been killed"
+        else
+          echo "sorry process killing is fail"
+          fi
+        ;;
+
+
+    Runningdurationprocess)
+        psname=$2
+        #pid=$3
+        echo "the list of your $psname is :"
+     ps -eo pid,user,ni,time,comm | grep "${psname}"
+     #ps  -p $pid -eo pid,user,ni,time,comm | grep "${psname}"
+    #command processed or not
+     if [ $? -eq 0 ]; then
+           echo "command is succesfulll"
+        else
+          echo "sorry information is wrong"
+          fi
+
+        ;;
+    ListOrphanProcess)
+    echo "this is the list of orphan process"
+        ps -eo pid,ppid,cmd|awk '{if ( $2==0 ) print $0 }'
+
+        ;;
+    ListZombieProcess)
+       ps -eo pid,ppid,s,cmd|awk '{if ( $3=="Z" ) print $0 }'
+
+        ;;
+    KillProcess)
+        pid=$2
+        kill -9 $pid
+         if [ $? -eq 0 ]; then
+           echo "process id $pid has been killed"
+        else
+          echo "sorry process killing is fail.$pid does not exist."
+          fi
+        ;;
+    ListWaitingprocess)
+        ps aux | awk '{if ($8 == "Sl") print $1, $2, $3, $8}'
+
+      ;;
+    *)  
+     echo "invalid operation":"next time"
+    ;;
+
+esac

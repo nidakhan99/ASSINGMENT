@@ -1,0 +1,125 @@
+#!/bin/bash
+set -x
+declare -A services
+while getopts ":o:s:a:p:" opt; do
+  case $opt in
+    o)
+        operation="${OPTARG}"
+     ;;
+    s)
+      srvc_path="${OPTARG}"
+      ;;
+    a)
+      nickname="${OPTARG}"
+      ;;
+    p)
+      priority="${OPTARG}"
+      ;;
+    :)
+      # Handle missing argument
+      echo "Option -$OPTARG requires an argument."
+      ;;
+    \?)
+      # Handle invalid option
+      echo "Invalid option: -$OPTARG."
+      ;;
+  esac
+done
+
+
+
+
+
+
+add_alias() {
+    local srvc_path="$1"
+    local nicknamename="$2"
+    echo "alias["$nickname"]="$srvc_path"" >>service1.txt
+   echo "Service '$nickname' registered with script path: $srvc_path" 
+    
+}
+
+
+
+  function start_service() {
+  local nickname=$1
+  local script_path="service1.txt"
+
+  if grep -w "$nickname" "$script_path" ;then
+   echo "Your service is started, congrats!"
+  else
+    echo "Sorry, your service is not registered yet. Please try again."
+  fi
+}
+
+
+function status_service() {
+    
+    local nickname=$1
+  local script_path="service1.txt"
+
+  if grep -w "$nickname" "$script_path" ;then
+   ps aux | grep -i "sleep 500000" | grep -v "grep"
+   echo "Your service is Running.it is "ACTIVE" "
+   else
+    echo "Sorry, your service is not Running"
+  fi
+
+}
+
+
+
+
+function list_services(){
+
+awk -F'[][=]' '/^alias\[/ {print $2}' service1.txt
+
+
+}
+
+
+function kill_alias(){
+
+local nickname=$1
+
+local nickname=$1
+  local script_path=$(cat "service1.txt")
+
+  if [[ -z "$script_path" ]];then
+  echo "sorry your service is not stopped please,TRY AGAIN!!!!"
+
+  else
+    echo "your service with alias name "${nickname}" is stopped."
+
+  fi
+
+
+}
+
+
+  case $operation in
+    register)
+      add_alias "$srvc_path" "$nickname"
+      ;;
+    start)
+      start_service "$nickname"
+      ;;
+    status)
+      status_service "$nickname"
+      ;;
+    list)
+      list_services
+      ;;
+    kill)
+      kill_alias
+      ;;
+    priority)
+      # commands for priority
+      ;;
+    *)
+      echo "Option not found"
+      ;;
+  esac
+
+
+
