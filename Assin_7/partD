@@ -1,0 +1,71 @@
+#!/bin/bash
+set -x
+
+#!/bin/bash
+
+# Function to check if a commit message starts with the specified pattern
+is_valid_commit() {
+    [[ $1 =~ ^JIRA-[0-9]+: ]]
+}
+
+# Check if required tools are installed
+if ! command -v git &> /dev/null; then
+    echo "Git is not installed. Please install Git."
+    exit 1
+fi
+
+# Parse command-line options
+while getopts ":u:d:" opt; do
+  case $opt in
+    u)
+      repo_url="$OPTARG"
+      ;;
+    d)
+      days="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Check if required options are provided
+if [ -z "$repo_url" ] || [ -z "$days" ]; then
+  echo "Usage: $0 -u <repository_url> -d <days>"
+  exit 1
+fi
+
+# Clone the repository
+repo_name=$(basename "$repo_url" .git)
+git clone "$repo_url" "$repo_name" || { echo "Failed to clone repository"; exit 1; }
+
+# Change to the repository directory
+cd "$repo_name" || { echo "Failed to change to repository directory"; exit 1; }
+
+# Get the current date
+current_date=$(date -I)
+
+# Generate HTML or CSV file with commit details
+output_file="commit_report_$current_date"
+
+echo "<html><body><table border='1'><tr><th>Commit ID</th><th>Author Name</th><th>Author Email</th><th>Commit Message</th><th>Changed Files</th><th>Valid Commit</th></tr>" > "$output_file.html"
+
+git log --since="$days days ago" --format="%H,%an,%ae,%s" --numstat |
+while IFS=, read -r commit_id author_name author_email commit_message; do
+    changed_files=$(git diff-tree --no-commit-id --name-only -r "$commit_id")
+    is_valid_commit=$(is_valid_commit "$commit_message")
+
+    echo "<tr><td>$commit_id</td><td>$author_name</td><td>$author_email</td><td>$commit_message</td><td>$changed_files</td><td>$is_valid_commit</td></tr>" >> "$output_file.html"
+done
+
+echo "</table></body></html>" >> "$output_file.html"
+
+echo "Commit report generated: $output_file.html" >>abc.html
+
+# Clean up: remove the cloned repository if needed
+

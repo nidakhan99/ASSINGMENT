@@ -1,0 +1,116 @@
+# #!/bin/bash
+
+set -x
+function list_Branch()
+{
+    git branch
+}
+
+
+function create_Branch(){
+git checkout -b ${OPTARG}
+echo "your new branch ${OPTARG} is created and you are currently on branch ${OPTARG}"
+
+}
+
+function delete_Branch(){
+  
+  git branch -d ${OPTARG} || echo "sorry some error" 
+  git branch
+
+
+}
+
+
+function merge_Branches() {
+    while getopts ":x:y:" opt; do
+    case $opt in
+      x)
+        bname1="${OPTARG}"
+        ;;
+      y)
+        bname2="${OPTARG}"
+        ;;
+      esac
+     done
+
+  git checkout "$bname2" || { echo "Error: Unable to checkout branch ${bname2}"; exit 1; }
+  git merge "$bname1" || { echo "Error: Unable to merge branch ${bname1} into ${bname2}"; exit 1; }
+  echo "Merged ${bname1} into ${bname2}"
+   
+}
+
+
+function rebase_Branches()
+{
+while getopts ":x:y:" opt; do
+    case $opt in
+      x)
+        bname1="${OPTARG}"
+        ;;
+      y)
+        bname2="${OPTARG}"
+        ;;
+      esac
+     done
+
+git checkout "$bname2"
+git rebase "$bname1"
+
+
+}
+
+
+
+
+while getopts ":lmrb:d:x:y:" opt; do
+    case $opt in
+        l)
+            list_Branch
+            ;;
+        b)
+            create_Branch "${OPTARG}"
+            ;;
+        d)
+            delete_Branch "${OPTARG}"
+           
+            ;;
+        x)
+              bname1="${OPTARG}"
+                ;;
+        y)
+              bname2="${OPTARG}"
+                  ;;
+        m)   
+              operation="merge"
+              ;;
+
+        r)
+              operation="rebase"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            exit 1
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument." >&2
+            exit 1
+            ;;
+    esac
+done
+
+
+echo "Operation: $operation, bname1=$bname1, bname2=$bname2"
+
+case $operation in
+  merge)
+    merge_Branches
+    ;;
+  rebase)
+    rebase_Branches
+    ;;
+  *)
+    echo "Invalid operation specified. Use -m for merge or -r for rebase." >&2
+    exit 1
+    ;;
+esac

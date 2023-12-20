@@ -1,0 +1,53 @@
+#!/bin/bash
+
+#script to manage tags:
+
+#create tage
+function create_tag(){
+ git tag "${OPTARG}"
+
+}
+
+#list tags
+function list_tags(){
+ git tag 
+echo "here is the list of your defined tags"
+}
+
+#delete tags
+
+
+function del_tags(){
+ git tag --d "${OPTARG}"
+ if [[ $? -eq 0 ]];then
+ echo "the tag ${OPTARG} has been deleted,Hurray!"
+ else
+ echo "sorry ERROR 888"
+ fi
+}
+
+while getopts ":lt::d:" opt; do
+  case $opt in
+    t)
+        tag_name="${OPTARG}"
+        create_tag
+      ;;
+    l)
+       list_tags
+      ;;
+    d)
+       del_tag="${OPTARG}"
+
+       del_tags
+
+      ;;
+    \?)
+      echo "type the right option dude!: -$OPTARG"
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument.so hurry up"
+      exit 1
+      ;;
+  esac
+done
